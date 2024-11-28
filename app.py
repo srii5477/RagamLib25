@@ -112,9 +112,9 @@ def login():
             flag = 1
             found_id = i
             if not bcrypt.check_password_hash(password, users[i]['password']):
-                return 'Incorrect password!'
+                flag = 0
     if flag == 0:
-        return 'No user matching your entry was found!'
+        return 'Incorrect credentials!'
     access_token = create_access_token(identity = found_id)
     return 'Successful login.'
 
