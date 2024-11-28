@@ -105,14 +105,13 @@ def update_password(id):
 def login():
     username = request.form.get('name')
     password = request.form.get('password')
-    hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
     flag = 0
     found_id = -1
     for i in range(len(users)):
         if users[i]['name'] == username:
             flag = 1
             found_id = i
-            if not bcrypt.check_password_hash(hashed_password, users[i]['password']):
+            if not bcrypt.check_password_hash(password, users[i]['password']):
                 return 'Incorrect password!'
     if flag == 0:
         return 'No user matching your entry was found!'
@@ -121,7 +120,10 @@ def login():
 
 @app.route('/delete-book', methods=['DELETE'])
 @jwt_required
-def delete_book(id):
+def delete_book():
+    id = request.form.get('id')
+    if id < 0 or id >= len(books):
+        return 'Invalid book ID.'
     del users[id]
     for j in range(len(books)):
         books[j]['id'] = j
