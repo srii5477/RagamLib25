@@ -1,11 +1,14 @@
 from flask import Flask, redirect, session, request
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
 from datetime import date
+from flask_bcrypt import Bcrypt 
+
 
 app = Flask(__name__)
 app.secret_key = 'secret123'
 app.config['JWT_SECRET_KEY'] = 'abc123'
 jwt = JWTManager(app)
+bcrypt = Bcrypt(app)
 
 books = []
 users = []
@@ -52,14 +55,17 @@ def add_user():
     name = request.form.get('name')
     email = request.form.get('email')
     membership_type = request.form.get('membership_type')
+    password = bcrypt.generate_password_hash(request.form.get('password')).decode('utf-8')
     today = date.today()
     if membership_type == 'Premium':
         session['new_details'] = {'id': new_id, 'name': name, 'email': email, 
-                'membership_type': membership_type, 'registered_date': today }
+                'membership_type': membership_type, 'registered_date': today,
+                'password': password }
         session['payment'] = request.form.get('amount_paid')
         return redirect('/make-premium-payment')
     new_user = {'id': new_id, 'name': name, 'email': email, 
-                'membership_type': membership_type, 'registered_date': today }
+                'membership_type': membership_type, 'registered_date': today, 'password':
+                    password}
     users.append(new_user)
     return new_user
 
@@ -86,5 +92,38 @@ def update_user(id, name, email, membership_type, registered_date):
     users[id]['membership_type'] = membership_type or users[id]['membership_type']
     users[id]['registered_date'] = registered_date or users[id]['registered_date']
     return users[id]
+
+@app.route('/forgot-password', methods=['PATCH'])
+def update_password(id):
+    new_password = request.form.get('password')
+    hashed_password = bcrypt.generate_password_hash(new_password).decode('utf-8')
+    users[id]['password'] = hashed_password 
+    return 'Successful updation.'
     
+    
+@app.route('/login', methods=['POST'])
+def login():
+    username = request.form.get('name')
+    password = request.form.get('password')
+    hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
+    flag = 0
+    found_id = -1
+    for i in range(len(users)):
+        if users[i]['name'] == username:
+            flag = 1
+            found_id = i
+            if not bcrypt.check_password_hash(hashed_password, users[i]['password']):
+                return 'Incorrect password!'
+    if flag == 0:
+        return 'No user matching your entry was found!'
+    access_token = create_access_token(identity = found_id)
+    return 'Successful login.'
+
+@app.route('/delete-book', methods=['DELETE'])
+@jwt_required
+def delete_book(id):
+    del users[id]
+    for j in range(len(books)):
+        books[j]['id'] = j
+    return 'Successful deletion.'
 
