@@ -94,7 +94,7 @@ def make_premium_payment():
     if session.get('payment', {}) == premium_amount:
         return redirect('/continue-add-user')
     else:
-        return 'Premium account creation failed!'
+        return 'Premium account creation failed!', 401
     
 @app.route('/continue-add-user', methods=['GET'])
 def continue_add_user():
@@ -143,7 +143,7 @@ def login():
             if not bcrypt.check_password_hash(password, users[i]['password']):
                 flag = 0
     if flag == 0:
-        return 'Incorrect credentials!'
+        return 'Incorrect credentials!', 401
     access_token = create_access_token(identity = found_id)
     return 'Successful login.'
 
