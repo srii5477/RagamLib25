@@ -160,7 +160,10 @@ def delete_book():
                     return 'Invalid book ID.'
                 del books[delete_id]
                 return 'Successful deletion of book.'
-    return 'Error in performing requested operation. Check whether you have the necessary privileges or whether you have logged in.', 500
+            else:
+                break
+                 
+    return 'You are not authorized to perform this operation.', 401
     
 
 @app.route('/delete-user', methods=['DELETE'])
@@ -177,4 +180,6 @@ def delete_user():
                     return 'Invalid user ID.'
                 del users[delete_id]
                 return 'Successful deletion of user profile.'
-    return 'Error in performing requested operation. Check whether you have the necessary privileges or whether you have logged in.', 500
+            else:
+                break
+    return 'You are not authorized to perform this operation.', 401
