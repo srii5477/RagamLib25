@@ -1,9 +1,9 @@
-from flask import Flask, redirect, session, request
+from flask import Flask, redirect, session, request, render_template
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
 from datetime import date
 from flask_bcrypt import Bcrypt 
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='static')
 app.secret_key = 'secret123'
 app.config['JWT_SECRET_KEY'] = 'abc123'
 jwt = JWTManager(app)
@@ -19,12 +19,12 @@ class Membership_Type():
     REGULAR = 1
     PREMIUM = 2
     
-@app.route('/')
+@app.route('/', methods=['GET'])
 def home():
-    return 'Welcome to RagamLibrary@25!'
+    return render_template("index.html")
 
 @app.route('/add-book', methods=['POST'])
-@jwt_required
+@jwt_required()
 def add_book():
     new_id = global_book_id
     global_book_id += 1
@@ -44,7 +44,7 @@ def view_books():
     return books
 
 @app.route('/update-book', methods=['PATCH'])
-@jwt_required
+@jwt_required()
 def update_book():
     update_id = request.args.get('id')
     title = request.form.get('title')
@@ -82,7 +82,7 @@ def add_user():
     return new_user
 
 @app.route('/promote-to-admin', methods=['PATCH'])
-@jwt_required
+@jwt_required()
 def promote_to_admin():
     promote_id = request.args.get('id')
     if True: #this request needs to be verified by another admin
@@ -102,12 +102,12 @@ def continue_add_user():
     return session.get('new_details', {})
 
 @app.route('/view-users', methods=['GET'])
-@jwt_required
+@jwt_required()
 def view_users():
     return users
 
 @app.route('/update-user', methods=['PATCH'])
-@jwt_required
+@jwt_required()
 def update_user():
     update_id = request.args.get('id')
     name = request.form.get('name')
@@ -121,7 +121,7 @@ def update_user():
     return users[id]
 
 @app.route('/forgot-password', methods=['PATCH'])
-@jwt_required
+@jwt_required()
 def update_password():
     new_password = request.form.get('password')
     update_id = request.args.get('id')
@@ -149,7 +149,7 @@ def login():
 
 #protected endpoints
 @app.route('/delete-book', methods=['DELETE'])
-@jwt_required
+@jwt_required()
 def delete_book():
     delete_id = request.form.get('id')
     user_id = get_jwt_identity()
@@ -167,7 +167,7 @@ def delete_book():
     
 
 @app.route('/delete-user', methods=['DELETE'])
-@jwt_required
+@jwt_required()
 def delete_user():
     delete_id = request.form.get('id')
     user_id = get_jwt_identity()
