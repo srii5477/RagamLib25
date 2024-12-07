@@ -21,7 +21,7 @@ class Membership_Type():
     
 @app.route('/', methods=['GET'])
 def home():
-    return render_template("index.html")
+    return 'Welcome to RagamLib25!'
 
 @app.route('/add-book', methods=['POST'])
 @jwt_required()
@@ -121,7 +121,6 @@ def update_user():
     return users[id]
 
 @app.route('/forgot-password', methods=['PATCH'])
-@jwt_required()
 def update_password():
     new_password = request.form.get('password')
     update_id = request.args.get('id')
