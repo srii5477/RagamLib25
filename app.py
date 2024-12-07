@@ -1,7 +1,7 @@
-from flask import Flask, redirect, session, request, render_template
-from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
+from flask import Flask, redirect, session, request, jsonify
+from flask_jwt_extended import get_jwt_identity, JWTManager, jwt_required, create_access_token, get_jwt_identity
 from datetime import date
-from flask_bcrypt import Bcrypt 
+from flask_bcrypt import Bcrypt, check_password_hash
 
 app = Flask(__name__, template_folder='static')
 app.secret_key = 'secret123'
@@ -10,9 +10,11 @@ jwt = JWTManager(app)
 bcrypt = Bcrypt(app)
 
 global_book_id = 0
-global_user_id = 0
+global_user_id = 1
 books = []
-users = []
+users = [{'id': 0, 'name': 'Sridevi', 'email': 'abc@yz.in', 'membership_type': 'Regular',
+          'password': '$2b$12$vXiRpeZ5I3Y2Pn1c/qguEeDYWqM1KsjzsFcJ6mdfR5boLOZUGg98e', 
+          'registered_date': '12312323'}]
 premium_amount = '500'
 
 class Membership_Type():
@@ -61,6 +63,7 @@ def update_book():
 
 @app.route('/add-user', methods=['POST'])
 def add_user():
+    global global_user_id
     new_id = global_user_id
     global_user_id += 1
     name = request.form.get('name')
@@ -139,12 +142,12 @@ def login():
         if users[i]['name'] == username:
             flag = 1
             found_id = i
-            if not bcrypt.check_password_hash(password, users[i]['password']):
+            if not check_password_hash(users[i]['password'].encode('utf-8'), password.encode('utf-8')):
                 flag = 0
     if flag == 0:
         return 'Incorrect credentials!', 401
     access_token = create_access_token(identity = found_id)
-    return 'Successful login.'
+    return jsonify(access_token=access_token), 200
 
 #protected endpoints
 @app.route('/delete-book', methods=['DELETE'])
