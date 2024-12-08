@@ -1,4 +1,1 @@
-multiple users with same name?
-admin level privilege?
-id optimization?
-error codes?
+logout
