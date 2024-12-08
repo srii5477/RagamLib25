@@ -27,7 +27,7 @@ books = [{'id': 0, 'title': 'The Famous Five', 'author': 'Enid Blyton' }]
 users = [{'id': 0, 'name': 'Sridevi', 'email': 'abc@yz.in', 'membership_type': Membership_Type.REGULAR,
           'password': '$2b$12$vXiRpeZ5I3Y2Pn1c/qguEeDYWqM1KsjzsFcJ6mdfR5boLOZUGg98e', 
           'registered_date': '12312323', 'user_type': User_Type.ADMIN}]
-premium_amount = '500'
+premium_amount = 500
 
     
 @app.route('/', methods=['GET'])
@@ -99,7 +99,7 @@ def add_user():
         session['new_details'] = {'id': new_id, 'name': name, 'email': email, 
                 'membership_type': membership_type, 'registered_date': today,
                 'password': password, 'user_type': user_type}
-        session['payment'] = request.form.get('amount_paid')
+        session['payment'] = request.form.get('payment')
         return redirect('/make-premium-payment')
     new_user = {'id': new_id, 'name': name, 'email': email, 
                 'membership_type': membership_type, 'registered_date': today, 'password':
@@ -122,7 +122,7 @@ def promote_to_admin():
 
 @app.route('/make-premium-payment', methods=['GET'])
 def make_premium_payment():
-    if session.get('payment', {}) == premium_amount:
+    if int(session.get('payment', {})) == premium_amount:
         return redirect('/continue-add-user')
     else:
         return 'Premium account creation failed!', 401
@@ -141,7 +141,7 @@ def view_users():
 @app.route('/update-premium-payment', methods=['GET'])
 @jwt_required()
 def update_premium_payment():
-    if session.get('payment', {}) == premium_amount:
+    if int(session.get('payment', {})) == premium_amount:
         users[int(session.get('update_id', {}))]['membership_type'] = Membership_Type.PREMIUM
         return redirect('/continue-update-user')
     else:
@@ -174,6 +174,8 @@ def update_user():
     name = request.form.get('name')
     email = request.form.get('email')
     payment = request.form.get('payment')
+    if payment:
+        payment = int(payment)
     membership_type = request.form.get('membership_type')
     if membership_type:
         membership_type = membership_type.lower()
