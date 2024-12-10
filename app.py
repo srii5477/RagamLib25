@@ -236,6 +236,9 @@ def update_user():
         update_id = int(update_id)
     else:
         return "Provide an id in the parameter."
+    user_id = int(get_jwt_identity())
+    if update_id != user_id:
+        return "You aren't permitted to change another user's details"
     name = request.form.get("name")
     email = request.form.get("email")
     payment = request.form.get("payment")
