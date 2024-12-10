@@ -11,6 +11,7 @@ from flask_jwt_extended import (
 )
 from datetime import date
 from flask_bcrypt import Bcrypt, check_password_hash
+from waitress import serve
 
 app = Flask(__name__, template_folder="static")
 app.secret_key = "secret123"
@@ -340,3 +341,6 @@ def delete_user():
             else:
                 break
     return "You are not authorized to perform this operation.", 401
+
+if __name__ == "__main__":
+   serve(app, host='0.0.0.0', port=8000)
